@@ -27,7 +27,12 @@ window.onload = function () {
       _r = 3;
       _aa = 600;
       _qizibanjing  = 18;
-      canvas.addEventListener('click',handle);
+  }
+
+  if(document.ontouchstart){
+    touch.on(canvas,'tap',handle);
+  }else{
+    canvas.addEventListener('click',handle);
   }
 
 
@@ -118,10 +123,12 @@ window.onload = function () {
   }
 
   function handle(e) {
+    console.log(1);
     var x =  Math.round( (e.offsetX-_yy)/_xx );
     var y =  Math.round( (e.offsetY-_yy)/_xx );
 
     if(e.type == 'tap'){
+      e.preventDefault();
       var x =  Math.round( (e.position.x - canvas.offsetLeft - _yy)/_xx );
       var y =  Math.round( (e.position.y - canvas.offsetTop - _yy)/_xx );
     }
@@ -132,8 +139,14 @@ window.onload = function () {
     delete kongbai[ x + '-' + y ];
 
     if( panduan(x,y,'black') >= 5 ){
+      if(document.ontouchstart){
+        touch.off(canvas,'tap',handle);
+      }else{
+        canvas.removeEventListener('click',handle);
+      }
       alert('黑棋赢');
-      window.location.reload();
+      redraw();
+      return;
     }
 
     var pos = ai();
@@ -141,12 +154,33 @@ window.onload = function () {
     qizi[ pos.x + '-' + pos.y ] = 'white';
     delete kongbai[ pos.x + '-' + pos.y ];
     if( panduan(Number(pos.x),Number(pos.y),'white') >= 5 ){
-        alert('白棋赢');
-        window.location.reload();
+      if(document.ontouchstart){
+        touch.off(canvas,'tap',handle);
+      }else{
+        canvas.removeEventListener('click',handle);
+      }
+      alert('白棋赢');
+      redraw();
+      return;
     };
   }
 
-  touch.on(canvas,'tap',handle);
+  var redraw = function () {
+    qizi = {};
+    kongbai = {};
+    for (var i = 0; i < 15; i++) {
+      for (var j = 0; j < 15; j++) {
+        kongbai[ i + '-' + j] = true;
+      }
+    }
+    ctx.clearRect(0,0,600,600);
+    huaqipan();
+    if(document.ontouchstart){
+      touch.on(canvas,'tap',handle);
+    }else{
+      canvas.addEventListener('click',handle);
+    }
+  }
 
   var xy2id = function(x,y) {
     return x + '-' + y;
