@@ -29,7 +29,7 @@ window.onload = function () {
       _qizibanjing  = 18;
   }
 
-  if(document.ontouchstart){
+  if( 'ontouchstart' in document ){
     touch.on(canvas,'tap',handle);
   }else{
     canvas.addEventListener('click',handle);
@@ -123,7 +123,6 @@ window.onload = function () {
   }
 
   function handle(e) {
-    console.log(1);
     var x =  Math.round( (e.offsetX-_yy)/_xx );
     var y =  Math.round( (e.offsetY-_yy)/_xx );
 
@@ -139,7 +138,7 @@ window.onload = function () {
     delete kongbai[ x + '-' + y ];
 
     if( panduan(x,y,'black') >= 5 ){
-      if(document.ontouchstart){
+      if('ontouchstart' in document){
         touch.off(canvas,'tap',handle);
       }else{
         canvas.removeEventListener('click',handle);
@@ -154,7 +153,7 @@ window.onload = function () {
     qizi[ pos.x + '-' + pos.y ] = 'white';
     delete kongbai[ pos.x + '-' + pos.y ];
     if( panduan(Number(pos.x),Number(pos.y),'white') >= 5 ){
-      if(document.ontouchstart){
+      if('ontouchstart' in document){
         touch.off(canvas,'tap',handle);
       }else{
         canvas.removeEventListener('click',handle);
@@ -175,7 +174,7 @@ window.onload = function () {
     }
     ctx.clearRect(0,0,600,600);
     huaqipan();
-    if(document.ontouchstart){
+    if('ontouchstart' in document){
       touch.on(canvas,'tap',handle);
     }else{
       canvas.addEventListener('click',handle);
