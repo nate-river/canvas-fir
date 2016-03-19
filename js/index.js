@@ -1,43 +1,68 @@
 window.onload = function () {
+
 	var
   canvas = document.querySelector('#canvas'),
   ctx = canvas.getContext('2d'),
   //棋盘大小
   ROW = 15,
   //棋盘星点位置数据
-  z = [140.5,460.5],
   //所有的落子数据
   qizi = {};
   //标示该谁落子
+
+  var _xx = 22;
+  var _yy = 6.5;
+  var _zz = 314;
+  var W = document.documentElement.clientWidth;
+  var z = [ 3*_xx + _yy, 11*_xx + _yy];
+  var _r = 1;
+  var _aa = 320;
+  var _qizibanjing  = 9;
+
+  if(W >= 768){
+      canvas.width = 600;
+      canvas.height = 600;
+      _xx = 40;
+      _yy = 20.5;
+      _zz = 580;
+      z = [140.5,460.5];
+      _r = 3;
+      _aa = 600;
+      _qizibanjing  = 18;
+      canvas.addEventListener('click',handle);
+  }
+
+
   var huaqipan = function() {
     ctx.clearRect(0,0,600,600);
     for(var i = 0; i < ROW; i++){
-      var li = ctx.createLinearGradient(0,0,560,0);
-      li.addColorStop(0.5,'#999');
-      li.addColorStop(1,'black');
-      ctx.strokeStyle = li;
+      // var li = ctx.createLinearGradient(0,0,_zz,0);
+      // li.addColorStop(0.5,'#999');
+      // li.addColorStop(1,'black');
+      ctx.strokeStyle = 'black';
       ctx.beginPath();
-      ctx.moveTo(20,i*40 + 20.5);
-      ctx.lineTo(580,i*40 + 20.5);
+      ctx.moveTo(_yy-0.5,i*_xx+ _yy);
+      ctx.lineTo(_zz,i*_xx + _yy);
       ctx.stroke();
 
-      var li = ctx.createLinearGradient(0,0,0,560);
-      li.addColorStop(0.5,'#333');
-      li.addColorStop(1,'#444');
-      ctx.strokeStyle = li;
+      // var li = ctx.createLinearGradient(0,0,0,_zz);
+      // li.addColorStop(0.5,'#333');
+      // li.addColorStop(1,'#444');
+      ctx.strokeStyle = 'black';
       ctx.beginPath();
-      ctx.moveTo(i*40+20.5,20);
-      ctx.lineTo(i*40+20.5,580);
+      ctx.moveTo(i*_xx+_yy,_yy-0.5);
+      ctx.lineTo(i*_xx+_yy,_zz);
       ctx.stroke();
     }
+
     ctx.fillStyle = 'black';
     ctx.beginPath();
-    ctx.arc(300.5,300.5,3,0,Math.PI*2);
+    ctx.arc(_aa/2+0.5,_aa/2+0.5,_r,0,Math.PI*2);
     ctx.fill();
     for(var i = 0; i < z.length; i++){
       for(var j = 0; j < z.length; j++){
         ctx.beginPath();
-        ctx.arc(z[i],z[j],3,0,Math.PI*2);
+        ctx.arc(z[i],z[j],_r,0,Math.PI*2);
         ctx.fill();
       }
     }
@@ -50,8 +75,8 @@ window.onload = function () {
   *  color boolean  true代表黑子  false代表白子
   */
   var luozi = function (x,y,color) {
-    var zx = 40*x + 20.5;
-    var zy = 40*y + 20.5;
+    var zx = _xx*x + _yy ;
+    var zy = _xx*y + _yy;
     var black = ctx.createRadialGradient(zx,zy,1,zx,zy,18);
     black.addColorStop(0.1,'#555');
     black.addColorStop(1,'black');
@@ -62,7 +87,7 @@ window.onload = function () {
     ctx.fillStyle = ( color == 'black') ?black:white;
 
     ctx.beginPath();
-    ctx.arc(zx,zy,18,0,Math.PI*2);
+    ctx.arc(zx,zy,_qizibanjing,0,Math.PI*2);
     ctx.fill();
   }
   var kongbai = {};
@@ -99,9 +124,15 @@ window.onload = function () {
     }
     return xx;
   }
-  canvas.onclick = function (e) {
-    var x =  Math.round( (e.offsetX-20.5)/40 );
-    var y =  Math.round( (e.offsetY-20.5)/40 );
+
+  function handle(e) {
+    var x =  Math.round( (e.offsetX-_yy)/_xx );
+    var y =  Math.round( (e.offsetY-_yy)/_xx );
+    if(e.type == 'tap'){
+      var x =  Math.round( (e.position.x - canvas.offsetLeft - _yy)/_xx );
+      var y =  Math.round( (e.position.y - canvas.offsetTop - _yy)/_xx );
+    }
+
     if( qizi[x+'-'+y] ){return;}
     luozi(x,y,'black');
     qizi[ x + '-' + y ] = 'black';
@@ -121,6 +152,9 @@ window.onload = function () {
         window.location.reload();
     };
   }
+
+  touch.on(canvas,'tap',handle);
+
 
   var houziAI  = function () {
     do{
