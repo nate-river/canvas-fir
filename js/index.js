@@ -34,7 +34,7 @@ window.onload = function () {
   var huaqipan = function() {
     ctx.clearRect(0,0,600,600);
     for(var i = 0; i < ROW; i++){
-      ctx.strokeStyle = '#24202e';
+      ctx.strokeStyle = '#777';
 
       ctx.beginPath();
       ctx.moveTo(_yy-0.5,i*_xx+ _yy);
@@ -69,14 +69,14 @@ window.onload = function () {
   var luozi = function (x,y,color) {
     var zx = _xx*x + _yy ;
     var zy = _xx*y + _yy;
-    var black = ctx.createRadialGradient(zx,zy,1,zx,zy,18);
-    black.addColorStop(0.1,'#555');
-    black.addColorStop(1,'black');
-    var white = ctx.createRadialGradient(zx,zy,1,zx,zy,18);
-    white.addColorStop(0.1,'#fff');
-    white.addColorStop(1,'#ddd');
+    // var black = ctx.createRadialGradient(zx,zy,1,zx,zy,18);
+    // black.addColorStop(0.1,'#555');
+    // black.addColorStop(1,'black');
+    // var white = ctx.createRadialGradient(zx,zy,1,zx,zy,18);
+    // white.addColorStop(0.1,'#fff');
+    // white.addColorStop(1,'#ddd');
 
-    ctx.fillStyle = ( color == 'black') ?black:white;
+    ctx.fillStyle = ( color == 'black') ?'black':'white';
 
     ctx.beginPath();
     ctx.arc(zx,zy,_qizibanjing,0,Math.PI*2);
@@ -120,6 +120,7 @@ window.onload = function () {
   function handle(e) {
     var x =  Math.round( (e.offsetX-_yy)/_xx );
     var y =  Math.round( (e.offsetY-_yy)/_xx );
+
     if(e.type == 'tap'){
       var x =  Math.round( (e.position.x - canvas.offsetLeft - _yy)/_xx );
       var y =  Math.round( (e.position.y - canvas.offsetTop - _yy)/_xx );
@@ -147,14 +148,6 @@ window.onload = function () {
 
   touch.on(canvas,'tap',handle);
 
-
-  var houziAI  = function () {
-    do{
-      var x = Math.floor( Math.random()*15 );
-      var y = Math.floor( Math.random()*15 );
-    }while( qizi[ x + '-' + y ] )
-    return {x:x,y:y};
-  }
   var xy2id = function(x,y) {
     return x + '-' + y;
   }
@@ -172,6 +165,7 @@ window.onload = function () {
     tx=x;ty=y;while( shuju[ xy2id( tx+1,ty+1 ) ]){tx++;ty++;youxie++};
     return Math.max(hang,shu,zuoxie,youxie);
   }
+
   var filter = function(color) {
     var r = {};
     for(var i in qizi){
