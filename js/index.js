@@ -3,96 +3,122 @@ window.onload = function () {
 	var
   canvas = document.querySelector('#canvas'),
   ctx = canvas.getContext('2d'),
+
   //棋盘大小
   ROW = 15,
+
   //所有的落子数据
-  qizi = {};
+  qizi = {},
 
-  var _xx = 22;
-  var _yy = 6.5;
-  var _zz = 314;
-  var W = document.documentElement.clientWidth;
-  var z = [ 3*_xx + _yy, 11*_xx + _yy];
-  var _r = 2;
-  var _aa = 320;
-  var _qizibanjing  = 9;
+  //代表空白的字典
+  kongbai = {};
 
-  if(W >= 768){
-      canvas.width = 600;
-      canvas.height = 600;
-      _xx = 40;
-      _yy = 20.5;
-      _zz = 580;
-      z = [140.5,460.5];
-      _r = 3;
-      _aa = 600;
-      _qizibanjing  = 18;
+  var  drawData_phone = {
+    perWidth:22,
+    padding:6.5,
+    lineEnd:314,
+    starpos:[ 3 * 22 + 6.5 , 11 * 22 + 6.5 ],
+    start_r:2,
+    piece_r:9,
+    canvasWidth:320
+  };
+
+  var drawData_desktop = {
+    perWidth:40,
+    padding:20.5,
+    lineEnd:580,
+    starpos:[ 3 * 40 + 20.5 , 11 * 40 + 20.5 ],
+    start_r:3,
+    piece_r:18,
+    canvasWidth:600
   }
 
-  if( 'ontouchstart' in document ){
-    touch.on(canvas,'tap',handle);
+  if ( document.documentElement.clientWidth > 768 ) {
+    var draw = drawData_desktop;
   }else{
-    canvas.addEventListener('click',handle);
+    draw = drawData_phone;
   }
 
+  // 画布大小适应两种屏幕
+  canvas.width =  canvas.height = draw.canvasWidth;
 
-  var huaqipan = function() {
-    ctx.clearRect(0,0,600,600);
-    for(var i = 0; i < ROW; i++){
-      ctx.strokeStyle = '#777';
-
-      ctx.beginPath();
-      ctx.moveTo(_yy-0.5,i*_xx+ _yy);
-      ctx.lineTo(_zz,i*_xx + _yy);
-      ctx.stroke();
-
-      ctx.beginPath();
-      ctx.moveTo(i*_xx+_yy,_yy-0.5);
-      ctx.lineTo(i*_xx+_yy,_zz);
-      ctx.stroke();
-    }
-
-    ctx.fillStyle = 'black';
-    ctx.beginPath();
-    ctx.arc(_aa/2+0.5,_aa/2+0.5,_r,0,Math.PI*2);
-    ctx.fill();
-    for(var i = 0; i < z.length; i++){
-      for(var j = 0; j < z.length; j++){
-        ctx.beginPath();
-        ctx.arc(z[i],z[j],_r,0,Math.PI*2);
-        ctx.fill();
+  // 一开始所有的位置都是空白
+  var initblank = function () {
+    for (var i = 0; i < ROW; i++) {
+      for (var j = 0; j < ROW; j++) {
+        kongbai[ i + '-' + j ] = true;
       }
     }
   }
-  huaqipan();
 
-  /*
-  *  x    number   落子x坐标
-  *  y    number   落子y坐标
-  *  color boolean  true代表黑子  false代表白子
-  */
-  var luozi = function (x,y,color) {
-    var zx = _xx*x + _yy ;
-    var zy = _xx*y + _yy;
-    // var black = ctx.createRadialGradient(zx,zy,1,zx,zy,18);
-    // black.addColorStop(0.1,'#555');
-    // black.addColorStop(1,'black');
-    // var white = ctx.createRadialGradient(zx,zy,1,zx,zy,18);
-    // white.addColorStop(0.1,'#fff');
-    // white.addColorStop(1,'#ddd');
+  var  handle = function( e ) {
+    e.preventDefault();
+    var x =  Math.round( (e.position.x - canvas.offsetLeft - draw.padding)/draw.perWidth );
+    var y =  Math.round( (e.position.y - canvas.offsetTop - draw.padding)/draw.perWidth );
 
-    ctx.fillStyle = ( color == 'black') ?'black':'white';
+    if( qizi[x+'-'+y] ){return;}
+    luozi(x,y,'black');
+    qizi[ x + '-' + y ] = 'black';
+    delete kongbai[ x + '-' + y ];
 
+    if( panduan(x,y,'black') >= 5 ){
+      alert('黑棋赢'); init();
+      return;
+    }
+
+    var pos = ai();
+    luozi(pos.x,pos.y,'white');
+    qizi[ pos.x + '-' + pos.y ] = 'white';
+    delete kongbai[ pos.x + '-' + pos.y ];
+    if( panduan(Number(pos.x),Number(pos.y),'white') >= 5 ){
+      alert('白棋赢'); init();
+      return;
+    };
+  }
+
+  var init = function() {
+    ctx.clearRect(0,0,draw.canvasWidth,draw.canvasWidth);
+    for(var i = 0; i < ROW; i++){
+      ctx.strokeStyle = '#777';
+      ctx.beginPath();
+      ctx.moveTo( draw.padding, i * draw.perWidth + draw.padding);
+      ctx.lineTo( draw.lineEnd, i * draw.perWidth + draw.padding);
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(i * draw.perWidth + draw.padding, draw.padding);
+      ctx.lineTo(i * draw.perWidth + draw.padding, draw.lineEnd);
+      ctx.stroke();
+    }
+    ctx.fillStyle = 'black';
     ctx.beginPath();
-    ctx.arc(zx,zy,_qizibanjing,0,Math.PI*2);
+    ctx.arc(draw.canvasWidth/2+0.5,draw.canvasWidth/2+0.5,draw.start_r,0,Math.PI*2);
+    ctx.fill();
+    for(var i = 0; i < draw.starpos.length; i++){
+      for(var j = 0; j < draw.starpos.length; j++){
+        ctx.beginPath();
+        ctx.arc(draw.starpos[i],draw.starpos[j],draw.start_r,0,Math.PI*2);
+        ctx.fill();
+      }
+    }
+    qizi = {};
+    initblank();
+  }
+
+  init();
+  touch.on(canvas,'tap',handle);
+
+
+  var luozi = function (x,y,color) {
+    var zx = draw.perWidth * x + draw.padding;
+    var zy = draw.perWidth * y + draw.padding;
+    ctx.fillStyle = ( color == 'black') ?'black':'white';
+    ctx.beginPath();
+    ctx.arc(zx,zy,draw.piece_r,0,Math.PI*2);
     ctx.fill();
   }
-  var kongbai = {};
-  for (var i = 0; i < 15; i++) {
-    for (var j = 0; j < 15; j++) {
-      kongbai[ i + '-' + j] = true;
-    }
-  }
+
+
 
   var ai = function () {
     var max = -1000000; var xx = {};
@@ -122,67 +148,18 @@ window.onload = function () {
     return xx;
   }
 
-  function handle(e) {
-    var x =  Math.round( (e.offsetX-_yy)/_xx );
-    var y =  Math.round( (e.offsetY-_yy)/_xx );
-
-    if(e.type == 'tap'){
-      e.preventDefault();
-      var x =  Math.round( (e.position.x - canvas.offsetLeft - _yy)/_xx );
-      var y =  Math.round( (e.position.y - canvas.offsetTop - _yy)/_xx );
-    }
-
-    if( qizi[x+'-'+y] ){return;}
-    luozi(x,y,'black');
-    qizi[ x + '-' + y ] = 'black';
-    delete kongbai[ x + '-' + y ];
-
-    if( panduan(x,y,'black') >= 5 ){
-      if('ontouchstart' in document){
-        touch.off(canvas,'tap',handle);
-      }else{
-        canvas.removeEventListener('click',handle);
-      }
-      alert('黑棋赢');
-      redraw();
-      return;
-    }
-
-    var pos = ai();
-    luozi(pos.x,pos.y,'white');
-    qizi[ pos.x + '-' + pos.y ] = 'white';
-    delete kongbai[ pos.x + '-' + pos.y ];
-    if( panduan(Number(pos.x),Number(pos.y),'white') >= 5 ){
-      if('ontouchstart' in document){
-        touch.off(canvas,'tap',handle);
-      }else{
-        canvas.removeEventListener('click',handle);
-      }
-      alert('白棋赢');
-      redraw();
-      return;
-    };
-  }
-
-  var redraw = function () {
-    qizi = {};
-    kongbai = {};
-    for (var i = 0; i < 15; i++) {
-      for (var j = 0; j < 15; j++) {
-        kongbai[ i + '-' + j] = true;
-      }
-    }
-    ctx.clearRect(0,0,600,600);
-    huaqipan();
-    if('ontouchstart' in document){
-      touch.on(canvas,'tap',handle);
-    }else{
-      canvas.addEventListener('click',handle);
-    }
-  }
-
   var xy2id = function(x,y) {
     return x + '-' + y;
+  }
+
+  var filter = function(color) {
+    var r = {};
+    for(var i in qizi){
+      if(qizi[i]  == color){
+        r[i] = qizi[i];
+      }
+    }
+    return r;
   }
 
   var panduan = function(x,y,color) {
@@ -197,16 +174,6 @@ window.onload = function () {
     tx=x;ty=y;while( shuju[ xy2id( tx-1,ty-1 ) ]){tx--;ty--;youxie++};
     tx=x;ty=y;while( shuju[ xy2id( tx+1,ty+1 ) ]){tx++;ty++;youxie++};
     return Math.max(hang,shu,zuoxie,youxie);
-  }
-
-  var filter = function(color) {
-    var r = {};
-    for(var i in qizi){
-      if(qizi[i]  == color){
-        r[i] = qizi[i];
-      }
-    }
-    return r;
   }
 
 }
