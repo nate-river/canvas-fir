@@ -5,17 +5,15 @@ window.onload = function () {
   ctx = canvas.getContext('2d'),
   //棋盘大小
   ROW = 15,
-  //棋盘星点位置数据
   //所有的落子数据
   qizi = {};
-  //标示该谁落子
 
   var _xx = 22;
   var _yy = 6.5;
   var _zz = 314;
   var W = document.documentElement.clientWidth;
   var z = [ 3*_xx + _yy, 11*_xx + _yy];
-  var _r = 1;
+  var _r = 2;
   var _aa = 320;
   var _qizibanjing  = 9;
 
@@ -36,19 +34,13 @@ window.onload = function () {
   var huaqipan = function() {
     ctx.clearRect(0,0,600,600);
     for(var i = 0; i < ROW; i++){
-      // var li = ctx.createLinearGradient(0,0,_zz,0);
-      // li.addColorStop(0.5,'#999');
-      // li.addColorStop(1,'black');
-      ctx.strokeStyle = 'black';
+      ctx.strokeStyle = '#24202e';
+
       ctx.beginPath();
       ctx.moveTo(_yy-0.5,i*_xx+ _yy);
       ctx.lineTo(_zz,i*_xx + _yy);
       ctx.stroke();
 
-      // var li = ctx.createLinearGradient(0,0,0,_zz);
-      // li.addColorStop(0.5,'#333');
-      // li.addColorStop(1,'#444');
-      ctx.strokeStyle = 'black';
       ctx.beginPath();
       ctx.moveTo(i*_xx+_yy,_yy-0.5);
       ctx.lineTo(i*_xx+_yy,_zz);
@@ -172,13 +164,10 @@ window.onload = function () {
     var tx,ty,hang = 1;shu = 1; zuoxie= 1;youxie = 1;
     tx=x;ty=y;while( shuju[ xy2id( tx-1,ty ) ]){tx--;hang++};
     tx=x;ty=y;while( shuju[ xy2id( tx+1,ty ) ]){tx++;hang++};
-    // if(hang >= 5){return true};
     tx=x;ty=y;while( shuju[ xy2id( tx,ty-1 ) ]){ty--;shu++};
     tx=x;ty=y;while( shuju[ xy2id( tx,ty+1 ) ]){ty++;shu++};
-    // if(shu >= 5){return true};
     tx=x;ty=y;while( shuju[ xy2id( tx+1,ty-1 ) ]){tx++;ty--;zuoxie++};
     tx=x;ty=y;while( shuju[ xy2id( tx-1,ty+1 ) ]){tx--;ty++;zuoxie++};
-    // if(zuoxie >= 5){return true};
     tx=x;ty=y;while( shuju[ xy2id( tx-1,ty-1 ) ]){tx--;ty--;youxie++};
     tx=x;ty=y;while( shuju[ xy2id( tx+1,ty+1 ) ]){tx++;ty++;youxie++};
     return Math.max(hang,shu,zuoxie,youxie);
@@ -192,6 +181,5 @@ window.onload = function () {
     }
     return r;
   }
-
 
 }
